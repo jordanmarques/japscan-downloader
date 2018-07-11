@@ -1,4 +1,4 @@
-package fr.jordanmarques.japscandownloader.service
+package fr.jordanmarques.japscandownloader.extractor
 
 import org.jsoup.nodes.Document
 import org.springframework.stereotype.Component
@@ -9,15 +9,15 @@ import javax.imageio.ImageIO
 
 
 @Component
-class Extractor {
+class ImageExtractor {
 
-    fun image(document: Document): BufferedImage {
+    fun extract(document: Document): BufferedImage? {
         val imageUrl = document.select("#parImg").attr("src") or document.select("#image").attr("src")
 
-        return ImageIO.read(fetch(imageUrl))
+        return imageUrl?.let { fetch(it)?.let { ImageIO.read(it) } }
     }
 
-    private fun fetch(url: String): InputStream {
+    private fun fetch(url: String): InputStream? {
         val connection = URL(url).openConnection()
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11")
         connection.connect()
@@ -25,11 +25,11 @@ class Extractor {
         return connection.getInputStream()
     }
 
-    infix fun String.or(src: String): String {
-        return if (this.isNotEmpty()) {
-            this
-        } else {
-            src
+    infix fun String.or(src: String): String? {
+        return when {
+            this.isNotEmpty() -> this
+            src.isNotEmpty() -> src
+            else -> null
         }
     }
 }

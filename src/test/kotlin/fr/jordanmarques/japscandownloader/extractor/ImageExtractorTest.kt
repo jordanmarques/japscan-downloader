@@ -1,4 +1,4 @@
-package fr.jordanmarques.japscandownloader.service
+package fr.jordanmarques.japscandownloader.extractor
 
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
@@ -7,10 +7,10 @@ import org.jsoup.Jsoup
 import org.junit.Before
 import org.junit.Test
 
-class ExtractorTest {
+class ImageExtractorTest {
 
     @InjectMockKs
-    lateinit var extractor: Extractor
+    lateinit var imageExtractor: ImageExtractor
 
     @Before
     fun init() = MockKAnnotations.init(this)
@@ -19,9 +19,7 @@ class ExtractorTest {
     fun `should extract an image`() {
         val document = Jsoup.parse(getResource("slam-dunk.html"))
 
-        val img = extractor.image(document)
-
-        //ImageIO.write(img, "png", File("toto.png"))
+        val img = imageExtractor.extract(document)
 
         Assertions.assertThat(img).isNotNull
     }
