@@ -2,7 +2,7 @@ package fr.jordanmarques.japscandownloader
 
 import fr.jordanmarques.japscandownloader.extractor.ChapterExtractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractor
-import fr.jordanmarques.japscandownloader.extractor.MangaRangeExtractor
+import fr.jordanmarques.japscandownloader.extractor.ChapterRangeExtractor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class Main @Autowired constructor(
         private var mangaExtractor: MangaExtractor,
-        private var mangaRangeExtractor: MangaRangeExtractor,
+        private var chapterRangeExtractor: ChapterRangeExtractor,
         private var chapterExtractor: ChapterExtractor
 ) {
 
@@ -60,7 +60,7 @@ class Main @Autowired constructor(
 
                     }
 
-                    mangaRangeExtractor.extract(manga = manga, range = range, prefix = prefix)
+                    chapterRangeExtractor.extract(manga = manga, range = range, prefix = prefix)
                 }
 
                 else -> {

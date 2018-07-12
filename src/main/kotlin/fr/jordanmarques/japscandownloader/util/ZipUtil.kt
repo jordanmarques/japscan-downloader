@@ -14,15 +14,15 @@ fun toCbz(sourceDirPath: String) {
 
     ZipOutputStream(Files.newOutputStream(zipFile)).use {
         stream ->
-        val sourceDir = Paths.get(sourceDirPath)
-        Files.walk(sourceDir).filter { path -> !Files.isDirectory(path) }.forEach { path ->
-            val zipEntry = ZipEntry(path.toString().substring(sourceDir.toString().length + 1))
-
+        File(sourceDirPath).walk(direction = FileWalkDirection.TOP_DOWN)
+                .filter { !it.isDirectory }
+                .forEach {
+            val zipEntry = ZipEntry(it.toString().substring(sourceDirPath.length + 1))
             stream.putNextEntry(zipEntry)
-            stream.write(Files.readAllBytes(path))
+            stream.write(Files.readAllBytes(it.toPath()))
             stream.closeEntry()
         }
     }
 
-    File(sourceDirPath).let { if (it.exists()) it.delete() }
+    File(sourceDirPath).deleteRecursively()
 }
