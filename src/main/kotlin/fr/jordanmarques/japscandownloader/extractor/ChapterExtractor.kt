@@ -1,6 +1,7 @@
 package fr.jordanmarques.japscandownloader.extractor
 
 import fr.jordanmarques.japscandownloader.JAPSCAN_URL
+import fr.jordanmarques.japscandownloader.util.length
 import fr.jordanmarques.japscandownloader.util.toCbz
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -12,7 +13,8 @@ import javax.imageio.ImageIO
 
 @Component
 class ChapterExtractor @Autowired constructor(
-        private var imageExtractor: ImageExtractor
+        private var imageExtractor: ImageExtractor,
+        private var cryptedImageExtractor: CryptedImageExtractor
 ) {
     private val log = LoggerFactory.getLogger(MangaExtractor::class.java)
     private val currentDirectory = System.getProperty("user.dir")
@@ -30,10 +32,18 @@ class ChapterExtractor @Autowired constructor(
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
-            val savePath = "$currentDirectory/$manga/$prefix$chapter/${i.toChapterNumber()}.png"
-            imageExtractor.extract(scanDoc)?.let {
+            val savePath = "$currentDirectory/$manga/$prefix$chapter/${i.toCbzScanNumber()}.png"
+
+            imageExtractor.extract(scanDoc)
+            ?.let {
                 ImageIO.write(it, "png", File(savePath))
                 log.info(savePath)
+            }?: run {
+                cryptedImageExtractor.extract(manga=manga, chapter = chapter, scan = i)
+                        ?.let {
+                            ImageIO.write(it, "png", File(savePath))
+                            log.info(savePath)
+                        }
             }
 
         }
@@ -50,16 +60,10 @@ class ChapterExtractor @Autowired constructor(
         return document.select("option").size
     }
 
-    private fun Int.length() = when(this) {
-        0 -> 1
-        else -> Math.log10(Math.abs(toDouble())).toInt() + 1
-    }
-
-    private fun Int.toChapterNumber(): String = when(this.length()) {
+    private fun Int.toCbzScanNumber(): String = when(this.length()) {
         1 -> "00$this"
         2 -> "0$this"
         3 -> "$this"
         else -> "$this"
     }
-
 }
