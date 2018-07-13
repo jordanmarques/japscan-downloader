@@ -59,7 +59,7 @@ class ChapterExtractor(
         File("$currentDirectory/$manga/$prefix$chapter").mkdirs()
     }
 
-    private fun numberOfScansInChapter(document: Document): Int {
+    fun numberOfScansInChapter(document: Document): Int {
         return document.select("option").size
     }
 
