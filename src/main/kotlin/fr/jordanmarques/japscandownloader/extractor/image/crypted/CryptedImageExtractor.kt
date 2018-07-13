@@ -1,4 +1,4 @@
-package fr.jordanmarques.japscandownloader.extractor
+package fr.jordanmarques.japscandownloader.extractor.image.crypted
 
 import fr.jordanmarques.japscandownloader.util.fetch
 import fr.jordanmarques.japscandownloader.util.length

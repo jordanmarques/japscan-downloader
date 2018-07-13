@@ -1,4 +1,4 @@
-package fr.jordanmarques.japscandownloader.extractor
+package fr.jordanmarques.japscandownloader.extractor.image
 
 import fr.jordanmarques.japscandownloader.util.fetch
 import org.jsoup.nodes.Document

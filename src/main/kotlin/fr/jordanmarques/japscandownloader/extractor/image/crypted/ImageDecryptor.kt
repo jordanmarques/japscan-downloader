@@ -1,14 +1,14 @@
-package fr.jordanmarques.japscandownloader.extractor
+package fr.jordanmarques.japscandownloader.extractor.image.crypted
 
 import java.awt.image.BufferedImage
 
-fun decrypt(encryptedImage: BufferedImage):BufferedImage? {
+fun decrypt(encryptedImage: BufferedImage): BufferedImage? {
 
     val width = encryptedImage.width
     val height = encryptedImage.height
 
-    val subImageWidth = Math.floor(width/ 5.0).toInt()
-    val subImageHeight = Math.floor(height/ 5.0).toInt()
+    val subImageWidth = Math.floor(width / 5.0).toInt()
+    val subImageHeight = Math.floor(height / 5.0).toInt()
 
     val subParts = extractSubParts(subImageWidth, subImageHeight, encryptedImage)
 

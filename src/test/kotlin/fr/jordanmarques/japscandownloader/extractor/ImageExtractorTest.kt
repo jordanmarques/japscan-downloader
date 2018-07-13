@@ -1,5 +1,6 @@
 package fr.jordanmarques.japscandownloader.extractor
 
+import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import org.assertj.core.api.Assertions

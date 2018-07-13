@@ -1,6 +1,9 @@
-package fr.jordanmarques.japscandownloader.extractor
+package fr.jordanmarques.japscandownloader.extractor.chapter
 
-import fr.jordanmarques.japscandownloader.JAPSCAN_URL
+import fr.jordanmarques.japscandownloader.util.JAPSCAN_URL
+import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.image.crypted.CryptedImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import fr.jordanmarques.japscandownloader.util.length
 import fr.jordanmarques.japscandownloader.util.toCbz
 import org.jsoup.Jsoup
@@ -35,17 +38,17 @@ class ChapterExtractor @Autowired constructor(
             val savePath = "$currentDirectory/$manga/$prefix$chapter/${i.toCbzScanNumber()}.png"
 
             imageExtractor.extract(scanDoc)
-            ?.let {
-                ImageIO.write(it, "png", File(savePath))
-                log.info(savePath)
-            }?: run {
-                cryptedImageExtractor.extract(manga=manga, chapter = chapter, scan = i)
-                        ?.let {
-                            ImageIO.write(it, "png", File(savePath))
-                            log.info(savePath)
-                        }
-            }
-
+                    ?.let {
+                        ImageIO.write(it, "png", File(savePath))
+                        log.info(savePath)
+                    }
+                    ?: run {
+                        cryptedImageExtractor.extract(manga = manga, chapter = chapter, scan = i)
+                                ?.let {
+                                    ImageIO.write(it, "png", File(savePath))
+                                    log.info(savePath)
+                                }
+                    }
         }
 
         toCbz("$currentDirectory/$manga/$prefix$chapter")
@@ -60,7 +63,7 @@ class ChapterExtractor @Autowired constructor(
         return document.select("option").size
     }
 
-    private fun Int.toCbzScanNumber(): String = when(this.length()) {
+    private fun Int.toCbzScanNumber(): String = when (this.length()) {
         1 -> "00$this"
         2 -> "0$this"
         3 -> "$this"
