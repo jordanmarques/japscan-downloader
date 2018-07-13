@@ -10,7 +10,7 @@ import javax.imageio.ImageIO
 @Component
 class CryptedImageExtractor {
 
-    fun extract(chapter: String, scan: Int, manga: String): BufferedImage?{
+    fun extract(chapter: String, scan: Int, manga: String): BufferedImage? {
         return fetch("https://cdn.japscan.cc/cr_images/${manga.capitalizeEachWords()}/$chapter/${scan.format()}.jpg")
                 ?.let { decrypt(ImageIO.read(it)) }
     }
@@ -20,9 +20,9 @@ class CryptedImageExtractor {
     }
 
     private fun Int.format(): String =
-        when{
-            this.length() == 1 -> "0$this"
-            else -> "$this"
-        }
+            when {
+                this.length() == 1 -> "0$this"
+                else -> "$this"
+            }
 }
 

@@ -1,7 +1,7 @@
 package fr.jordanmarques.japscandownloader.extractor
 
 import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
-import fr.jordanmarques.japscandownloader.getResource
+import fr.jordanmarques.japscandownloader.getResourceAsString
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import org.assertj.core.api.Assertions
@@ -19,7 +19,7 @@ class ImageExtractorTest {
 
     @Test
     fun `should extract an image`() {
-        val document = Jsoup.parse(getResource("image-extract.html", this::class))
+        val document = Jsoup.parse(getResourceAsString("image-extract.html", this::class))
 
         val img = imageExtractor.extract(document)
 

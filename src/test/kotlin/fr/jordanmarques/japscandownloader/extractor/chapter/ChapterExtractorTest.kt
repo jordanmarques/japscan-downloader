@@ -2,7 +2,7 @@ package fr.jordanmarques.japscandownloader.extractor.chapter
 
 import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.image.crypted.CryptedImageExtractor
-import fr.jordanmarques.japscandownloader.getResource
+import fr.jordanmarques.japscandownloader.getResourceAsString
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -27,7 +27,7 @@ class ChapterExtractorTest {
 
     @Test
     fun `should return the number of scans in a chapter`() {
-        val document = Jsoup.parse(getResource("number-of-scan-in-chapter.html", this::class))
+        val document = Jsoup.parse(getResourceAsString("number-of-scan-in-chapter.html", this::class))
         val expectedNumberOfScans = 104
 
         val numberOfScansInChapter = chapterExtractor.numberOfScansInChapter(document)

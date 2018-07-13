@@ -1,7 +1,7 @@
 package fr.jordanmarques.japscandownloader.extractor.manga
 
 import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
-import fr.jordanmarques.japscandownloader.getResource
+import fr.jordanmarques.japscandownloader.getResourceAsString
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -23,7 +23,7 @@ class MangaExtractorTest {
 
     @Test
     fun `should return the manga chapters number`() {
-        val document = Jsoup.parse(getResource("number-of-manga-chapters.html", this::class))
+        val document = Jsoup.parse(getResourceAsString("number-of-manga-chapters.html", this::class))
         val expectedNumberOfChapters = 274
 
         val numberOfChapters = mangaExtractor.numberOfChapter(document, "")
