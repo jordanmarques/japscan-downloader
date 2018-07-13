@@ -15,7 +15,7 @@ import java.io.File
 import javax.imageio.ImageIO
 
 @Component
-class ChapterExtractor constructor(
+class ChapterExtractor(
         private val imageExtractor: ImageExtractor,
         private val cryptedImageExtractor: CryptedImageExtractor
 ) {
