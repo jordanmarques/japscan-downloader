@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class Main @Autowired constructor(
+class Main constructor(
         private var mangaExtractor: MangaExtractor,
         private var chapterRangeExtractor: ChapterRangeExtractor,
         private var chapterExtractor: ChapterExtractor

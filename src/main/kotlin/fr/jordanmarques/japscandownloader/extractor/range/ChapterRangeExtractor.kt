@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class ChapterRangeExtractor @Autowired constructor(private var chapterExtractor: ChapterExtractor) {
+class ChapterRangeExtractor constructor(private var chapterExtractor: ChapterExtractor) {
 
     private val log = LoggerFactory.getLogger(ChapterRangeExtractor::class.java)
 
