@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class Main constructor(
-        private var mangaExtractor: MangaExtractor,
-        private var chapterRangeExtractor: ChapterRangeExtractor,
-        private var chapterExtractor: ChapterExtractor
+        private val mangaExtractor: MangaExtractor,
+        private val chapterRangeExtractor: ChapterRangeExtractor,
+        private val chapterExtractor: ChapterExtractor
 ) {
 
     private val log = LoggerFactory.getLogger(Main::class.java)
@@ -25,7 +25,7 @@ class Main constructor(
 
         if(manga.isEmpty()){
             val message = """
-                A Name of manga should be provide.
+                A manga name should be provided.
                 Example: java -Dmode=full -Dmanga=nanatsu-no-taizai
                  """
             log.error(message)
@@ -40,7 +40,7 @@ class Main constructor(
                 "chapter" -> {
                     if(chapter.isEmpty()){
                         val message = """
-                            In 'chapter mode, a number of chapter should be provide'
+                            In 'chapter mode, a number of chapter should be provided'
                             Example: java -Dmode=chapter -Dmanga=nanatsu-no-taizai -Dchapter=200
                             """
                         log.error(message)
@@ -52,7 +52,7 @@ class Main constructor(
                 "range" -> {
                     if(range.isEmpty()){
                         val message = """
-                            In 'range' Mode, a range of chapter should be provide
+                            In 'range' Mode, a range of chapter should be provided
                             Example: java -Dmode=range -Dmanga=nanatsu-no-taizai -Drange=123-140
                             """
                         log.error(message)
@@ -65,7 +65,7 @@ class Main constructor(
 
                 else -> {
                     val message = """
-                        A mode should be provide:
+                        A mode should be provided:
 
                         full -> download all the chapters of the manga
                         range -> download a range of chapters of the manga

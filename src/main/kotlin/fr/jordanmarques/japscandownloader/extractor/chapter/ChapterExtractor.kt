@@ -16,8 +16,8 @@ import javax.imageio.ImageIO
 
 @Component
 class ChapterExtractor constructor(
-        private var imageExtractor: ImageExtractor,
-        private var cryptedImageExtractor: CryptedImageExtractor
+        private val imageExtractor: ImageExtractor,
+        private val cryptedImageExtractor: CryptedImageExtractor
 ) {
     private val log = LoggerFactory.getLogger(MangaExtractor::class.java)
     private val currentDirectory = System.getProperty("user.dir")
