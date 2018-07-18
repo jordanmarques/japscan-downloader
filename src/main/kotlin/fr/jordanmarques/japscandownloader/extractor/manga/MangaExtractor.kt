@@ -16,10 +16,10 @@ class MangaExtractor(private val chapterExtractor: ChapterExtractor): Extractor 
     override fun mode() = "full"
 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
-        val document = Jsoup.connect("${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}").get()
+        val manga = Jsoup.connect("${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}").get()
 
         log.info("Start downloading ${mangaExtractorContext.manga}")
-        for (i in 1..numberOfChapter(document, mangaExtractorContext.prefix)) {
+        for (i in 1..manga.numberOfChapters(mangaExtractorContext.prefix)) {
             chapterExtractor.extract(MangaExtractorContext(
                     manga = mangaExtractorContext.manga,
                     chapter = i.toString(),
@@ -28,13 +28,13 @@ class MangaExtractor(private val chapterExtractor: ChapterExtractor): Extractor 
             )
         }
     }
+}
 
-    fun numberOfChapter(document: Document, prefix: String): Int {
-        val lastChapter = document.select("#chapitres")[0].attr("data-uri")
+fun Document.numberOfChapters(prefix: String): Int {
+    val lastChapter = this.select("#chapitres")[0].attr("data-uri")
 
-        return when {
-            prefix.isNotEmpty() -> lastChapter.replace(prefix, "").toInt()
-            else -> lastChapter.toInt()
-        }
+    return when {
+        prefix.isNotEmpty() -> lastChapter.replace(prefix, "").toInt()
+        else -> lastChapter.toInt()
     }
 }

@@ -30,7 +30,7 @@ class ChapterExtractorTest {
         val document = Jsoup.parse(getResourceAsString("number-of-scan-in-chapter.html", this::class))
         val expectedNumberOfScans = 104
 
-        val numberOfScansInChapter = chapterExtractor.numberOfScansInChapter(document)
+        val numberOfScansInChapter = document.numberOfScans()
 
         Assertions.assertThat(numberOfScansInChapter).isEqualTo(expectedNumberOfScans)
     }

@@ -37,12 +37,12 @@ class ChapterExtractor(
         }
 
         val chapterUrl = "${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}"
-        val document = Jsoup.connect(chapterUrl).get()
+        val chapter = Jsoup.connect(chapterUrl).get()
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
         createChapterDirectory(mangaExtractorContext)
 
-        for (i in 1..numberOfScansInChapter(document)) {
+        for (i in 1..chapter.numberOfScans()) {
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
@@ -54,7 +54,7 @@ class ChapterExtractor(
                         log.info(savePath)
                     }
                     ?: run {
-                        cryptedImageExtractor.extract(manga = mangaExtractorContext.manga!!, chapter = mangaExtractorContext.chapter, scan = i)
+                        cryptedImageExtractor.extract(manga = mangaExtractorContext.manga, chapter = mangaExtractorContext.chapter, scan = i)
                                 ?.let {
                                     ImageIO.write(it, "png", File(savePath))
                                     log.info(savePath)
@@ -70,10 +70,6 @@ class ChapterExtractor(
         File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}").mkdirs()
     }
 
-    fun numberOfScansInChapter(document: Document): Int {
-        return document.select("option").size
-    }
-
     private fun Int.toCbzScanNumber(): String = when (this.length()) {
         1 -> "00$this"
         2 -> "0$this"
@@ -81,3 +77,5 @@ class ChapterExtractor(
         else -> "$this"
     }
 }
+
+fun Document.numberOfScans(): Int = this.select("option").size

@@ -26,7 +26,7 @@ class MangaExtractorTest {
         val document = Jsoup.parse(getResourceAsString("number-of-manga-chapters.html", this::class))
         val expectedNumberOfChapters = 274
 
-        val numberOfChapters = mangaExtractor.numberOfChapter(document, "")
+        val numberOfChapters = document.numberOfChapters("")
 
         Assertions.assertThat(numberOfChapters).isEqualTo(expectedNumberOfChapters)
 
