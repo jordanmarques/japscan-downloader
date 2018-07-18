@@ -5,7 +5,7 @@
 
 	<groupId>fr.jordanmarques</groupId>
 	<artifactId>japscan-downloader</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>14.0</version>
 	<packaging>jar</packaging>
 
 	<name>japscan-downloader</name>
