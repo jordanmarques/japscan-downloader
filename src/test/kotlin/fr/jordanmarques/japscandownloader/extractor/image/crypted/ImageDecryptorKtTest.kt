@@ -1,5 +1,6 @@
 package fr.jordanmarques.japscandownloader.extractor.image.crypted
 
+import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.decrypt
 import fr.jordanmarques.japscandownloader.getResourcePath
 import fr.jordanmarques.japscandownloader.percentageOfDifferencesWith
 import org.assertj.core.api.Assertions

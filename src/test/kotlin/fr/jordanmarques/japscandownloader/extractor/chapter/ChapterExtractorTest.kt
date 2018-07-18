@@ -1,7 +1,7 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter
 
-import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
-import fr.jordanmarques.japscandownloader.extractor.image.crypted.CryptedImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
 import fr.jordanmarques.japscandownloader.getResourceAsString
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs

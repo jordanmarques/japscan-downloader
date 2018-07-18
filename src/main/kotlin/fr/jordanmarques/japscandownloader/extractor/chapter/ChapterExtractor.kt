@@ -1,15 +1,15 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter
 
-import fr.jordanmarques.japscandownloader.util.JAPSCAN_URL
-import fr.jordanmarques.japscandownloader.extractor.image.ImageExtractor
-import fr.jordanmarques.japscandownloader.extractor.image.crypted.CryptedImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.Extractor
+import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
+import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
+import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import fr.jordanmarques.japscandownloader.util.length
 import fr.jordanmarques.japscandownloader.util.toCbz
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.File
 import javax.imageio.ImageIO
@@ -18,24 +18,35 @@ import javax.imageio.ImageIO
 class ChapterExtractor(
         private val imageExtractor: ImageExtractor,
         private val cryptedImageExtractor: CryptedImageExtractor
-) {
+): Extractor {
     private val log = LoggerFactory.getLogger(MangaExtractor::class.java)
     private val currentDirectory = System.getProperty("user.dir")
 
-    fun extract(japscanUrl: String = JAPSCAN_URL, manga: String, chapter: String, prefix: String = "") {
-        log.info("Start downloading chapter $prefix$chapter")
+    override fun mode() ="chapter"
 
-        val chapterUrl = "$japscanUrl/$manga/$prefix$chapter"
+    override fun extract(mangaExtractorContext: MangaExtractorContext) {
+        log.info("Start downloading chapter ${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}")
+
+        if (mangaExtractorContext.chapter.isEmpty()) {
+            val message = """
+                            In 'chapter mode, a number of chapter should be provided'
+                            Example: java -Dmode=chapter -Dmanga=nanatsu-no-taizai -Dchapter=200
+                            """
+            log.error(message)
+            throw Exception(message)
+        }
+
+        val chapterUrl = "${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}"
         val document = Jsoup.connect(chapterUrl).get()
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
-        createChapterDirectory(manga, chapter, prefix)
+        createChapterDirectory(mangaExtractorContext)
 
         for (i in 1..numberOfScansInChapter(document)) {
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
-            val savePath = "$currentDirectory/$manga/$prefix$chapter/${i.toCbzScanNumber()}.png"
+            val savePath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}/${i.toCbzScanNumber()}.png"
 
             imageExtractor.extract(scanDoc)
                     ?.let {
@@ -43,7 +54,7 @@ class ChapterExtractor(
                         log.info(savePath)
                     }
                     ?: run {
-                        cryptedImageExtractor.extract(manga = manga, chapter = chapter, scan = i)
+                        cryptedImageExtractor.extract(manga = mangaExtractorContext.manga!!, chapter = mangaExtractorContext.chapter, scan = i)
                                 ?.let {
                                     ImageIO.write(it, "png", File(savePath))
                                     log.info(savePath)
@@ -51,12 +62,12 @@ class ChapterExtractor(
                     }
         }
 
-        toCbz("$currentDirectory/$manga/$prefix$chapter")
+        toCbz("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}")
 
     }
 
-    private fun createChapterDirectory(manga: String, chapter: String, prefix: String) {
-        File("$currentDirectory/$manga/$prefix$chapter").mkdirs()
+    private fun createChapterDirectory(mangaExtractorContext: MangaExtractorContext) {
+        File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}").mkdirs()
     }
 
     fun numberOfScansInChapter(document: Document): Int {

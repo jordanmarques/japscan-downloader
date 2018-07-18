@@ -1,4 +1,4 @@
-package fr.jordanmarques.japscandownloader.extractor.image.crypted
+package fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted
 
 import java.awt.image.BufferedImage
 

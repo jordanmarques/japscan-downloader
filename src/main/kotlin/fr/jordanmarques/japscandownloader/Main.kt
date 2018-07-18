@@ -1,5 +1,7 @@
 package fr.jordanmarques.japscandownloader
 
+import fr.jordanmarques.japscandownloader.extractor.Extractor
+import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
 import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import fr.jordanmarques.japscandownloader.extractor.range.ChapterRangeExtractor
@@ -8,22 +10,37 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class Main(
-        private val mangaExtractor: MangaExtractor,
-        private val chapterRangeExtractor: ChapterRangeExtractor,
-        private val chapterExtractor: ChapterExtractor
-) {
+class Main {
 
     private val log = LoggerFactory.getLogger(Main::class.java)
+
+    @Autowired
+    private lateinit var extractors: List<Extractor>
 
     fun run() {
         val mode = System.getProperties().getProperty("mode")
         val manga = System.getProperties().getProperty("manga")
-        val chapter = System.getProperties().getProperty("chapter")
-        val range = System.getProperties().getProperty("range")
-        val prefix = System.getProperties()?.getProperty("prefix") ?: ""
+        val chapter = System.getProperties().getProperty("chapter")?:""
+        val range = System.getProperties().getProperty("range")?:""
+        val prefix = System.getProperties()?.getProperty("prefix")?:""
 
-        if(manga.isEmpty()){
+        val mangaExtractorContext = MangaExtractorContext(manga = manga, chapter = chapter, prefix = prefix, range = range)
+
+
+
+        if (mode == null || mode.isEmpty()) {
+            val message = """
+                A mode should be provided:
+
+                        full -> download all the chapters of the manga
+                        range -> download a range of chapters of the manga
+                        chapter -> download a chapter of the manga
+
+                        Example: java -Dmode=full -Dmanga=nanatsu-no-taizai
+                 """
+            log.error(message)
+            throw Exception(message)
+        } else if (manga == null || manga.isEmpty()) {
             val message = """
                 A manga name should be provided.
                 Example: java -Dmode=full -Dmanga=nanatsu-no-taizai
@@ -32,51 +49,9 @@ class Main(
             throw Exception(message)
         }
 
-        mode?.let {
-            when (it) {
-
-                "full" -> mangaExtractor.extract(manga = manga, prefix = prefix)
-
-                "chapter" -> {
-                    if(chapter.isEmpty()){
-                        val message = """
-                            In 'chapter mode, a number of chapter should be provided'
-                            Example: java -Dmode=chapter -Dmanga=nanatsu-no-taizai -Dchapter=200
-                            """
-                        log.error(message)
-                        throw Exception(message)
-                    }
-                    chapterExtractor.extract(manga = manga, chapter = chapter, prefix = prefix)
-                }
-
-                "range" -> {
-                    if(range.isEmpty()){
-                        val message = """
-                            In 'range' Mode, a range of chapter should be provided
-                            Example: java -Dmode=range -Dmanga=nanatsu-no-taizai -Drange=123-140
-                            """
-                        log.error(message)
-                        throw Exception(message)
-
-                    }
-
-                    chapterRangeExtractor.extract(manga = manga, range = range, prefix = prefix)
-                }
-
-                else -> {
-                    val message = """
-                        A mode should be provided:
-
-                        full -> download all the chapters of the manga
-                        range -> download a range of chapters of the manga
-                        chapter -> download a chapter of the manga
-
-                        Example: java -Dmode=full -Dmanga=nanatsu-no-taizai
-                        """
-                    log.error(message)
-                    throw Exception(message)
-                }
-            }
+        extractors.forEach {
+            when { it.mode().equals(mode, ignoreCase = true) -> it.extract(mangaExtractorContext) }
         }
+
     }
 }
