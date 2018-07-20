@@ -5,11 +5,10 @@
 
 	<groupId>fr.jordanmarques</groupId>
 	<artifactId>japscan-downloader</artifactId>
-	<version>14.0</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>japscan-downloader</name>
-	<description>Demo project for Spring Boot</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
