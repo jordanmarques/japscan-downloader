@@ -1,5 +1,6 @@
 package fr.jordanmarques.japscandownloader
 
+import fr.jordanmarques.japscandownloader.launcher.front.Front
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -15,7 +16,7 @@ fun main(args: Array<String>) {
                     beans {
                         bean {
                             ApplicationRunner {
-                                ref<Main>().run()
+                                Front.main(args)
                             }
                         }
                     }

@@ -1,10 +1,7 @@
-package fr.jordanmarques.japscandownloader
+package fr.jordanmarques.japscandownloader.launcher.jar
 
 import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
-import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
-import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
-import fr.jordanmarques.japscandownloader.extractor.range.ChapterRangeExtractor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
