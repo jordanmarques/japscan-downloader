@@ -40,6 +40,9 @@ class MainController {
     lateinit var stopButton: Button
     lateinit var downloadButton: Button
 
+    lateinit var range: RadioButton
+    lateinit var chapter: RadioButton
+
     lateinit var console: TextArea
 
     private val log = LoggerFactory.getLogger(MainController::class.java)
@@ -69,6 +72,12 @@ class MainController {
 
     fun onNameInputKeyPressed(){
         downloadButton.isDisable = nameInput.text.isEmpty()
+    }
+
+    fun onModeRadioButtonClicked(){
+        fromInput.isVisible = range.isSelected
+        toInput.isVisible = range.isSelected
+        chapterInput.isVisible = chapter.isSelected
     }
 
     private fun buildMangaExtractorContext(nameInput: TextField, chapterInput: TextField, prefixInput: TextField, fromInput: TextField, toInput: TextField): MangaExtractorContext {
