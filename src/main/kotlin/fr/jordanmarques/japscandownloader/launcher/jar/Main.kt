@@ -2,6 +2,7 @@ package fr.jordanmarques.japscandownloader.launcher.jar
 
 import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
+import fr.jordanmarques.japscandownloader.extractor.Range
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -19,9 +20,12 @@ class Main {
         val manga = System.getProperties().getProperty("manga")
         val chapter = System.getProperties().getProperty("chapter")?:""
         val range = System.getProperties().getProperty("range")?:""
+        val split = range.split("-")
+        val from = split[0].toInt()
+        val to = split[1].toInt()
         val prefix = System.getProperties()?.getProperty("prefix")?:""
 
-        val mangaExtractorContext = MangaExtractorContext(manga = manga, chapter = chapter, prefix = prefix, range = range)
+        val mangaExtractorContext = MangaExtractorContext(manga = manga, chapter = chapter, prefix = prefix, range = Range(from = from, to = to))
 
 
 

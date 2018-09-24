@@ -11,4 +11,7 @@ data class MangaExtractorContext(val japscanUrl: String = JAPSCAN_URL,
                                  val manga: String,
                                  val chapter: String,
                                  val prefix: String,
-                                 val range: String)
+                                 val range: Range)
+
+data class Range(val from: Int,
+                 val to: Int )

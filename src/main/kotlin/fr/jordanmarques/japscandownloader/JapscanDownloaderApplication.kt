@@ -1,25 +1,16 @@
 package fr.jordanmarques.japscandownloader
 
-import fr.jordanmarques.japscandownloader.launcher.front.Front
-import org.springframework.boot.ApplicationRunner
+import de.felixroske.jfxsupport.AbstractJavaFxApplicationSupport
+import fr.jordanmarques.japscandownloader.launcher.front.main.MainView
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.context.support.beans
 
 @SpringBootApplication
-class JapscanDownloaderApplication
+class JapscanDownloaderApplication: AbstractJavaFxApplicationSupport()
 
-fun main(args: Array<String>) {
-    SpringApplicationBuilder()
-            .sources(JapscanDownloaderApplication::class.java)
-            .initializers(
-                    beans {
-                        bean {
-                            ApplicationRunner {
-                                Front.main(args)
-                            }
-                        }
-                    }
-            )
-            .run(*args)
-}
+    fun main(vararg args: String) {
+        AbstractJavaFxApplicationSupport.launch(JapscanDownloaderApplication::class.java, MainView::class.java, args)
+    }
+
+
+
+

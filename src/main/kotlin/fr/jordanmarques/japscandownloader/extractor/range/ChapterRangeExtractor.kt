@@ -17,19 +17,9 @@ class ChapterRangeExtractor(private val chapterExtractor: ChapterExtractor): Ext
 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
 
-        if (mangaExtractorContext.range.isEmpty()) {
-            val message = """
-                            In 'range' Mode, a range of chapter should be provided
-                            Example: java -Dmode=range -Dmanga=nanatsu-no-taizai -Drange=123-140
-                            """
-            log.error(message)
-            throw Exception(message)
-
-        }
-
-        val split = mangaExtractorContext.range.split("-")
-        val from = split[0].toInt()
-        val to = split[1].toInt()
+        val range = mangaExtractorContext.range
+        val from = range.from
+        val to = range.to
 
         if(to <= from){
             val message = """
