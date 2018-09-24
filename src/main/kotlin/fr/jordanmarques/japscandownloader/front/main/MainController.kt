@@ -1,14 +1,14 @@
-package fr.jordanmarques.japscandownloader.launcher.front.main
+package fr.jordanmarques.japscandownloader.front.main
 
 import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.Range
+import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import javafx.application.Platform
-import javafx.scene.control.RadioButton
-import javafx.scene.control.TextArea
-import javafx.scene.control.TextField
-import javafx.scene.control.ToggleGroup
+import javafx.concurrent.Task
+import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -27,6 +27,8 @@ class MainController {
     @Autowired
     private lateinit var extractors: List<Extractor>
 
+    private lateinit var downloadThread: Thread
+
     lateinit var mode: ToggleGroup
 
     lateinit var nameInput: TextField
@@ -35,21 +37,38 @@ class MainController {
     lateinit var toInput: TextField
     lateinit var chapterInput: TextField
 
+    lateinit var stopButton: Button
+    lateinit var downloadButton: Button
+
     lateinit var console: TextArea
+
+    private val log = LoggerFactory.getLogger(MainController::class.java)
 
     fun download(mouseEvent: MouseEvent) {
         appendConsoleToView()
         val mangaExtractorContext = buildMangaExtractorContext(nameInput, chapterInput, prefixInput, fromInput, toInput)
-        val mode = mode.selectedMode()
+        val extractor = extractors.first { it.mode().equals(mode.selectedMode(), ignoreCase = true) }
 
-        extractors.forEach {
-            when {
-                it.mode().equals(mode, ignoreCase = true) -> it.extract(mangaExtractorContext)
+        val downloadTask = object : Task<Void>() {
+            public override fun call(): Void? {
+                extractor.extract(mangaExtractorContext)
+                return null
             }
         }
 
+        downloadThread = Thread(downloadTask)
+        downloadThread.start()
+        stopButton.isDisable = false
+    }
 
+    fun stop() {
+        downloadThread.stop()
+        stopButton.isDisable = true
+        log.info("Stop Download")
+    }
 
+    fun onNameInputKeyPressed(){
+        downloadButton.isDisable = nameInput.text.isEmpty()
     }
 
     private fun buildMangaExtractorContext(nameInput: TextField, chapterInput: TextField, prefixInput: TextField, fromInput: TextField, toInput: TextField): MangaExtractorContext {
