@@ -1,3 +1,15 @@
 .root {
-    -fx-background-color: #cffcff;
+    -fx-background-color: rgba(102, 248, 255, 0.13);
+}
+
+/*Flat button example */
+.jfx-button {
+    -jfx-button-type: RAISED;
+    -fx-background-color: #007cff;
+    -fx-text-fill: white;
+}
+
+.jfx-radio-button{
+    -jfx-selected-color: #007cff;
+    -jfx-unselected-color: #5A5A5A;
 }
