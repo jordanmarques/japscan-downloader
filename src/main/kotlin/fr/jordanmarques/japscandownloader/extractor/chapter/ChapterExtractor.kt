@@ -9,7 +9,6 @@ import fr.jordanmarques.japscandownloader.util.length
 import fr.jordanmarques.japscandownloader.util.toCbz
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import javax.imageio.ImageIO
@@ -19,20 +18,16 @@ class ChapterExtractor(
         private val imageExtractor: ImageExtractor,
         private val cryptedImageExtractor: CryptedImageExtractor
 ): Extractor {
-    private val log = LoggerFactory.getLogger(MangaExtractor::class.java)
     private val currentDirectory = System.getProperty("user.dir")
 
     override fun mode() ="chapter"
 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
-        log.info("Start downloading chapter ${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}")
-
         if (mangaExtractorContext.chapter.isEmpty()) {
             val message = """
-                            In 'chapter mode, a number of chapter should be provided'
-                            Example: java -Dmode=chapter -Dmanga=nanatsu-no-taizai -Dchapter=200
+                            In chapter mode, a number of chapter should be provided'
                             """
-            log.error(message)
+            println(message)
             throw Exception(message)
         }
 
@@ -41,8 +36,11 @@ class ChapterExtractor(
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
         createChapterDirectory(mangaExtractorContext)
+        val numberOfScans = chapter.numberOfScans()
 
-        for (i in 1..chapter.numberOfScans()) {
+        println("Downloading chapter ${mangaExtractorContext.chapter}")
+        for (i in 1..numberOfScans) {
+            print("${(i*100)/numberOfScans}%")
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
@@ -51,16 +49,16 @@ class ChapterExtractor(
             imageExtractor.extract(scanDoc)
                     ?.let {
                         ImageIO.write(it, "png", File(savePath))
-                        log.info(savePath)
                     }
                     ?: run {
                         cryptedImageExtractor.extract(manga = mangaExtractorContext.manga, chapter = mangaExtractorContext.chapter, scan = i)
                                 ?.let {
                                     ImageIO.write(it, "png", File(savePath))
-                                    log.info(savePath)
                                 }
                     }
         }
+
+        println("Chapter ${mangaExtractorContext.chapter} downloaded")
 
         toCbz("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}")
 

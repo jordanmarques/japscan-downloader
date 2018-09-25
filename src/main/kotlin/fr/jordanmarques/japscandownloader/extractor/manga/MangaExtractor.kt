@@ -5,21 +5,21 @@ import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class MangaExtractor(private val chapterExtractor: ChapterExtractor): Extractor {
-
-    private val log = LoggerFactory.getLogger(MangaExtractor::class.java)
 
     override fun mode() = "full"
 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
         val manga = Jsoup.connect("${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}").get()
 
-        log.info("Start downloading ${mangaExtractorContext.manga}")
-        for (i in 1..manga.numberOfChapters(mangaExtractorContext.prefix)) {
+        println()
+        println("Start downloading ${mangaExtractorContext.manga}")
+        val numberOfChapters = manga.numberOfChapters(mangaExtractorContext.prefix)
+        for (i in 1..numberOfChapters) {
+            println("Download chapter $i/$numberOfChapters")
             chapterExtractor.extract(MangaExtractorContext(
                     manga = mangaExtractorContext.manga,
                     chapter = i.toString(),

@@ -8,7 +8,6 @@ import javafx.application.Platform
 import javafx.concurrent.Task
 import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -45,8 +44,6 @@ class MainController {
 
     lateinit var console: TextArea
 
-    private val log = LoggerFactory.getLogger(MainController::class.java)
-
     fun download(mouseEvent: MouseEvent) {
         appendConsoleToView()
         val mangaExtractorContext = buildMangaExtractorContext(nameInput, chapterInput, prefixInput, fromInput, toInput)
@@ -67,7 +64,7 @@ class MainController {
     fun stop() {
         downloadThread.stop()
         stopButton.isDisable = true
-        log.info("Stop Download")
+        println("Stop Download")
     }
 
     fun onNameInputKeyPressed(){
