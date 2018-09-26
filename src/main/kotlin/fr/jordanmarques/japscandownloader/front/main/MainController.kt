@@ -3,21 +3,18 @@ package fr.jordanmarques.japscandownloader.front.main
 import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.Range
-import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import javafx.application.Platform
 import javafx.concurrent.Task
 import javafx.scene.control.*
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
+import javafx.stage.Stage
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.OutputStream
 import java.io.PrintStream
-import java.lang.System.console
-
-
-
-
 
 
 @Component
@@ -44,8 +41,16 @@ class MainController {
 
     lateinit var console: TextArea
 
+    lateinit var infoNameImageView: ImageView
+    lateinit var infoPrefixImageView: ImageView
+
+    fun initialize() {
+        createTooltips()
+    }
+
     fun download(mouseEvent: MouseEvent) {
         appendConsoleToView()
+
         val mangaExtractorContext = buildMangaExtractorContext(nameInput, chapterInput, prefixInput, fromInput, toInput)
         val extractor = extractors.first { it.mode().equals(mode.selectedMode(), ignoreCase = true) }
 
@@ -77,6 +82,10 @@ class MainController {
         chapterInput.isVisible = chapter.isSelected
     }
 
+    fun ToggleGroup.selectedMode(): String {
+        return (this.selectedToggle as RadioButton).id
+    }
+
     private fun buildMangaExtractorContext(nameInput: TextField, chapterInput: TextField, prefixInput: TextField, fromInput: TextField, toInput: TextField): MangaExtractorContext {
         val from = if (fromInput.text == "") 0 else fromInput.text.toInt()
         val to = if (toInput.text == "") 0 else toInput.text.toInt()
@@ -88,15 +97,32 @@ class MainController {
                 range = Range(from = from, to = to))
     }
 
+
+    private fun createTooltips() {
+        val mangaNameImage = Image(MainController::class.java.getResourceAsStream("/images/manga-name-info.png"))
+        val prefixImage = Image(MainController::class.java.getResourceAsStream("/images/prefix-info.png"))
+
+        val mangaNameTooltip = Tooltip()
+        addImageToTooltip(mangaNameTooltip, mangaNameImage)
+
+        val prefixTooltip = Tooltip()
+        addImageToTooltip(prefixTooltip, prefixImage)
+
+        Tooltip.install(infoNameImageView, mangaNameTooltip)
+        Tooltip.install(infoPrefixImageView, prefixTooltip)
+    }
+
     private fun appendConsoleToView() {
         val ps = PrintStream(Console(console))
         System.setOut(ps)
         System.setErr(ps)
     }
 
-    fun ToggleGroup.selectedMode(): String {
-        return (this.selectedToggle as RadioButton).id
+    private fun addImageToTooltip(tooltip: Tooltip, image: Image) {
+        tooltip.graphic = ImageView(image)
+        infoNameImageView.isPickOnBounds = true
     }
+
 
     inner class Console(private val console: TextArea) : OutputStream() {
 

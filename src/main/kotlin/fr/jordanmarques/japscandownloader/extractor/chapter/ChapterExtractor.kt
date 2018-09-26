@@ -40,7 +40,7 @@ class ChapterExtractor(
 
         println("Downloading chapter ${mangaExtractorContext.chapter}")
         for (i in 1..numberOfScans) {
-            print("${(i*100)/numberOfScans}%")
+            print("${(i*100)/numberOfScans}% ")
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 

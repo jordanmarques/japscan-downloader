@@ -9,6 +9,6 @@ class MySplashScreen: SplashScreen() {
     }
 
     override fun getImagePath(): String {
-        return "/splash.jpg"
+        return "/images/splash.jpg"
     }
 }
