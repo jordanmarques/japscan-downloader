@@ -4,7 +4,6 @@ import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
-import fr.jordanmarques.japscandownloader.extractor.manga.MangaExtractor
 import fr.jordanmarques.japscandownloader.util.length
 import fr.jordanmarques.japscandownloader.util.toCbz
 import org.jsoup.Jsoup
@@ -23,49 +22,46 @@ class ChapterExtractor(
     override fun mode() ="chapter"
 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
-        if (mangaExtractorContext.chapter.isEmpty()) {
+        if (mangaExtractorContext.currentChapter.isEmpty()) {
             val message = """
-                            In chapter mode, a number of chapter should be provided'
+                            In Chapter mode, a number of Chapter should be provided'
                             """
             println(message)
             throw Exception(message)
         }
 
-        val chapterUrl = "${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}"
+        val chapterUrl = "${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}"
         val chapter = Jsoup.connect(chapterUrl).get()
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
         createChapterDirectory(mangaExtractorContext)
         val numberOfScans = chapter.numberOfScans()
 
-        println("Downloading chapter ${mangaExtractorContext.chapter}")
         for (i in 1..numberOfScans) {
-            print("${(i*100)/numberOfScans}% ")
+            mangaExtractorContext.scanDownloadProgression = (i*100)/numberOfScans
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
-            val savePath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}/${i.toCbzScanNumber()}.png"
+            val savePath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}/${i.toCbzScanNumber()}.png"
 
             imageExtractor.extract(scanDoc)
                     ?.let {
                         ImageIO.write(it, "png", File(savePath))
                     }
                     ?: run {
-                        cryptedImageExtractor.extract(manga = mangaExtractorContext.manga, chapter = mangaExtractorContext.chapter, scan = i)
+                        cryptedImageExtractor.extract(manga = mangaExtractorContext.manga, chapter = mangaExtractorContext.currentChapter, scan = i)
                                 ?.let {
                                     ImageIO.write(it, "png", File(savePath))
                                 }
                     }
         }
 
-        println("Chapter ${mangaExtractorContext.chapter} downloaded")
-
-        toCbz("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}")
+        toCbz("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}")
 
     }
 
     private fun createChapterDirectory(mangaExtractorContext: MangaExtractorContext) {
-        File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.chapter}").mkdirs()
+        File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}").mkdirs()
     }
 
     private fun Int.toCbzScanNumber(): String = when (this.length()) {

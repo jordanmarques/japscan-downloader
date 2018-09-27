@@ -1,24 +1,29 @@
 package fr.jordanmarques.japscandownloader.front.main
 
+import com.jfoenix.controls.JFXProgressBar
 import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.Range
+import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
+import fr.jordanmarques.japscandownloader.listener.MangaNameListener
+import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
 import javafx.application.Platform
 import javafx.concurrent.Task
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
-import javafx.stage.Stage
+import org.omg.CORBA.portable.Delegate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.OutputStream
 import java.io.PrintStream
+import kotlin.properties.Delegates
 
 
 @Component
-class MainController {
+class MainController : ScanDownloadProgressionListener, MangaNameListener, CurrentChapterListener {
 
     @Autowired
     private lateinit var extractors: List<Extractor>
@@ -39,17 +44,22 @@ class MainController {
     lateinit var range: RadioButton
     lateinit var chapter: RadioButton
 
-    lateinit var console: TextArea
-
     lateinit var infoNameImageView: ImageView
     lateinit var infoPrefixImageView: ImageView
 
+    lateinit var progressBar: JFXProgressBar
+
+    lateinit var mangaLabel: Label
+    lateinit var chapterLabel: Label
+
     fun initialize() {
         createTooltips()
+        MangaExtractorContext.listenForChapterChange(this)
+        MangaExtractorContext.listenForMangaName(this)
+        MangaExtractorContext.listenForDownloadProgression(this)
     }
 
     fun download(mouseEvent: MouseEvent) {
-        appendConsoleToView()
 
         val mangaExtractorContext = buildMangaExtractorContext(nameInput, chapterInput, prefixInput, fromInput, toInput)
         val extractor = extractors.first { it.mode().equals(mode.selectedMode(), ignoreCase = true) }
@@ -58,6 +68,16 @@ class MainController {
             public override fun call(): Void? {
                 extractor.extract(mangaExtractorContext)
                 return null
+            }
+
+            public override fun succeeded() {
+                super.succeeded()
+                Platform.runLater {
+                    progressBar.progress = 0.0
+                    stopButton.isDisable = true
+                    mangaLabel.text = ""
+                    chapterLabel.text = ""
+                }
             }
         }
 
@@ -69,7 +89,9 @@ class MainController {
     fun stop() {
         downloadThread.stop()
         stopButton.isDisable = true
-        println("Stop Download")
+        progressBar.progress = 0.0
+        mangaLabel.text = ""
+        chapterLabel.text = ""
     }
 
     fun onNameInputKeyPressed(){
@@ -86,17 +108,39 @@ class MainController {
         return (this.selectedToggle as RadioButton).id
     }
 
+    override fun scanDownloadProgressionChange(progression: Int) {
+        Platform.runLater {
+            progressBar.progress = (progression.toDouble() / 100)
+        }
+    }
+
+    override fun currentChapterChange(chapterNumber: String, numberOfMangaChapters: String) {
+        Platform.runLater {
+            if(numberOfMangaChapters == "null"){
+                chapterLabel.text = chapterNumber
+            } else {
+                chapterLabel.text = "$chapterNumber/$numberOfMangaChapters"
+            }
+        }
+    }
+
+    override fun mangaNameChange(mangaName: String) {
+        val cleanName = mangaName.replace("-","  ").capitalize()
+        Platform.runLater {
+            mangaLabel.text = cleanName
+        }
+    }
+
     private fun buildMangaExtractorContext(nameInput: TextField, chapterInput: TextField, prefixInput: TextField, fromInput: TextField, toInput: TextField): MangaExtractorContext {
         val from = if (fromInput.text == "") 0 else fromInput.text.toInt()
         val to = if (toInput.text == "") 0 else toInput.text.toInt()
 
         return MangaExtractorContext(
                 manga = nameInput.text,
-                chapter = chapterInput.text,
+                currentChapter = chapterInput.text,
                 prefix = prefixInput.text,
                 range = Range(from = from, to = to))
     }
-
 
     private fun createTooltips() {
         val mangaNameImage = Image(MainController::class.java.getResourceAsStream("/images/manga-name-info.png"))
@@ -112,28 +156,9 @@ class MainController {
         Tooltip.install(infoPrefixImageView, prefixTooltip)
     }
 
-    private fun appendConsoleToView() {
-        val ps = PrintStream(Console(console))
-        System.setOut(ps)
-        System.setErr(ps)
-    }
-
     private fun addImageToTooltip(tooltip: Tooltip, image: Image) {
         tooltip.graphic = ImageView(image)
         infoNameImageView.isPickOnBounds = true
-    }
-
-
-    inner class Console(private val console: TextArea) : OutputStream() {
-
-        private fun appendText(valueOf: String) {
-            Platform.runLater { console.appendText(valueOf) }
-        }
-
-        @Throws(IOException::class)
-        override fun write(b: Int) {
-            appendText(b.toChar().toString())
-        }
     }
 
 }

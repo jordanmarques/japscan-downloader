@@ -15,17 +15,11 @@ class MangaExtractor(private val chapterExtractor: ChapterExtractor): Extractor 
     override fun extract(mangaExtractorContext: MangaExtractorContext) {
         val manga = Jsoup.connect("${mangaExtractorContext.japscanUrl}/${mangaExtractorContext.manga}").get()
 
-        println()
-        println("Start downloading ${mangaExtractorContext.manga}")
-        val numberOfChapters = manga.numberOfChapters(mangaExtractorContext.prefix)
-        for (i in 1..numberOfChapters) {
-            println("Download chapter $i/$numberOfChapters")
-            chapterExtractor.extract(MangaExtractorContext(
-                    manga = mangaExtractorContext.manga,
-                    chapter = i.toString(),
-                    prefix = mangaExtractorContext.prefix,
-                    range = mangaExtractorContext.range)
-            )
+        mangaExtractorContext.lastChapterToDownload = manga.numberOfChapters(mangaExtractorContext.prefix)
+
+        for (i in 1..mangaExtractorContext.lastChapterToDownload as Int) {
+            mangaExtractorContext.currentChapter = i.toString()
+            chapterExtractor.extract(mangaExtractorContext)
         }
     }
 }
