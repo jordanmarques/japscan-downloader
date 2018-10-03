@@ -34,34 +34,35 @@ class ChapterExtractor(
         val chapter = Jsoup.connect(chapterUrl).get()
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
-        createChapterDirectory(mangaExtractorContext)
-        val numberOfScans = chapter.numberOfScans()
+        val chapterDirectoryPath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.manga}-${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}"
+        createChapterDirectory(mangaExtractorContext, chapterDirectoryPath)
 
+        val numberOfScans = chapter.numberOfScans()
         for (i in 1..numberOfScans) {
             mangaExtractorContext.scanDownloadProgression = (i*100)/numberOfScans
             val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
-            val savePath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}/${i.toCbzScanNumber()}.png"
+            val scanPath = "$chapterDirectoryPath/${i.toCbzScanNumber()}.png"
 
             imageExtractor.extract(scanDoc)
                     ?.let {
-                        ImageIO.write(it, "png", File(savePath))
+                        ImageIO.write(it, "png", File(scanPath))
                     }
                     ?: run {
                         cryptedImageExtractor.extract(manga = mangaExtractorContext.manga, chapter = mangaExtractorContext.currentChapter, scan = i)
                                 ?.let {
-                                    ImageIO.write(it, "png", File(savePath))
+                                    ImageIO.write(it, "png", File(scanPath))
                                 }
                     }
         }
 
-        toCbz("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}")
+        toCbz(chapterDirectoryPath)
 
     }
 
-    private fun createChapterDirectory(mangaExtractorContext: MangaExtractorContext) {
-        File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}").mkdirs()
+    private fun createChapterDirectory(mangaExtractorContext: MangaExtractorContext, path: String) {
+        File("$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.manga}-${mangaExtractorContext.prefix}${mangaExtractorContext.currentChapter}").mkdirs()
     }
 
     private fun Int.toCbzScanNumber(): String = when (this.length()) {
