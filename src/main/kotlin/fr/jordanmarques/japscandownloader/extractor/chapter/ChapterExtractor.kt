@@ -1,6 +1,5 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter
 
-import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
@@ -17,26 +16,34 @@ import javax.imageio.ImageIO
 class ChapterExtractor(
         private val imageExtractor: ImageExtractor,
         private val cryptedImageExtractor: CryptedImageExtractor
-): Extractor {
+) {
     private val currentDirectory = System.getProperty("user.dir")
 
-    override fun mode() ="chapter"
+    fun extract(mangaExtractorContext: MangaExtractorContext) {
 
-    override fun extract(mangaExtractorContext: MangaExtractorContext) {
-
-        mangaExtractorContext.chaptersToDownload.forEach { chapterUrl ->
+        mangaExtractorContext.chaptersToDownload.forEach { chapter ->
             run {
-                extractScansAndCreateChapterCbz("$JAPSCAN_URL$chapterUrl", mangaExtractorContext)
+                mangaExtractorContext.currentChapter = chapter.url.extractChapterName()
+                extractScansAndCreateChapterCbz("$JAPSCAN_URL${chapter.url}", mangaExtractorContext)
             }
         }
 
+    }
+
+    fun extractAvailableChapters(mangaExtractorContext: MangaExtractorContext): List<Chapter> {
+        val availableChaptersUrl = "/mangas"
+        val availableChapters = Jsoup.connect("$JAPSCAN_URL$availableChaptersUrl/${mangaExtractorContext.manga}").get()
+                ?: throw RuntimeException("")
+
+        val htmlChapters = availableChapters.select("#liste_chapitres li")
+        return htmlChapters.map { Chapter(name = it.text(), url = it.select("a").attr("href")) }
     }
 
     private fun extractScansAndCreateChapterCbz(chapterUrl: String, mangaExtractorContext: MangaExtractorContext) {
         val chapter = Jsoup.connect(chapterUrl).get()
                 ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
 
-        val chapterDirectoryPath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.manga}-${chapterUrl.extractChapterName()}"
+        val chapterDirectoryPath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.manga}-${mangaExtractorContext.currentChapter}"
 
         createChapterDirectory(chapterDirectoryPath)
 

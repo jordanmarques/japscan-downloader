@@ -1,5 +1,6 @@
 package fr.jordanmarques.japscandownloader.extractor
 
+import fr.jordanmarques.japscandownloader.extractor.chapter.Chapter
 import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
 import fr.jordanmarques.japscandownloader.listener.MangaNameListener
 import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
@@ -7,16 +8,11 @@ import kotlin.properties.Delegates
 
 import fr.jordanmarques.japscandownloader.util.JAPSCAN_URL
 
-interface Extractor {
-    fun extract(mangaExtractorContext: MangaExtractorContext)
-    fun mode(): String
-}
-
 class MangaExtractorContext{
 
     var lastChapterToDownload: Int? = null
 
-    var chaptersToDownload: List<String> = mutableListOf()
+    var chaptersToDownload: List<Chapter> = mutableListOf()
 
     var manga: String by Delegates.observable ("") {
         _, old, new ->
@@ -33,9 +29,8 @@ class MangaExtractorContext{
         MangaExtractorContext.scanDownloadProgressionListeners.forEach { it.scanDownloadProgressionChange(new) }
     }
 
-    constructor(manga: String, currentChapter: String = "", chaptersToDownload: List<String>) {
+    constructor(manga: String, chaptersToDownload: List<Chapter> = mutableListOf()) {
         this.manga = manga
-        this.currentChapter = currentChapter
         this.chaptersToDownload = chaptersToDownload
     }
 

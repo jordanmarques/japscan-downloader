@@ -2,6 +2,7 @@ package fr.jordanmarques.japscandownloader.front.main
 
 import com.jfoenix.controls.JFXProgressBar
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
+import fr.jordanmarques.japscandownloader.extractor.chapter.Chapter
 import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
 import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
 import fr.jordanmarques.japscandownloader.listener.MangaNameListener
@@ -12,7 +13,24 @@ import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.GridPane
 import org.springframework.stereotype.Component
+import com.sun.javafx.robot.impl.FXRobotHelper.getChildren
+import javafx.scene.layout.VBox
+import javafx.scene.control.cell.CheckBoxListCell
+import org.jboss.logging.MessageBundle
+import javafx.beans.value.ObservableValue
+import javafx.geometry.Insets
+import javafx.scene.control.CheckBox
+import javafx.scene.layout.Priority
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import javafx.collections.ListChangeListener
+import org.controlsfx.control.CheckListView
+
+
+
+
 
 
 @Component
@@ -21,11 +39,15 @@ class MainController(
 ): ScanDownloadProgressionListener, MangaNameListener, CurrentChapterListener {
 
     private lateinit var downloadThread: Thread
+    private lateinit var chaptersToDownload: List<Chapter>
+
+    lateinit var gridPane: GridPane
 
     lateinit var nameInput: TextField
 
     lateinit var stopButton: Button
     lateinit var downloadButton: Button
+    lateinit var selectChaptersButton: Button
 
     lateinit var infoNameImageView: ImageView
 
@@ -33,6 +55,8 @@ class MainController(
 
     lateinit var mangaLabel: Label
     lateinit var chapterLabel: Label
+
+
 
     fun initialize() {
         createTooltips()
@@ -43,11 +67,9 @@ class MainController(
 
     fun download(mouseEvent: MouseEvent) {
 
-        val list = mutableListOf<String>() //TODO Build Window Chapter Choice
-
         val downloadTask = object : Task<Void>() {
             public override fun call(): Void? {
-                chapterExtractor.extract(MangaExtractorContext(manga = nameInput.text, chaptersToDownload = list))
+                chapterExtractor.extract(MangaExtractorContext(manga = nameInput.text, chaptersToDownload = chaptersToDownload))
                 return null
             }
 
@@ -65,6 +87,19 @@ class MainController(
         downloadThread = Thread(downloadTask)
         downloadThread.start()
         stopButton.isDisable = false
+    }
+
+    fun selectChapters() {
+        var availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text))
+
+//        val strings = FXCollections.observableArrayList<String>()
+//        availableChapters.forEach { strings.add(it.name) }
+//
+//        val checkListView = CheckListView(strings)
+//
+//        checkListView.checkModel.checkedItems.addListener(ListChangeListener { println(checkListView.checkModel.checkedItems) })
+//
+//        gridPane.add(checkListView, 0,2)
     }
 
     fun stop() {
