@@ -14,10 +14,9 @@ interface Extractor {
 
 class MangaExtractorContext{
 
-    val japscanUrl: String = JAPSCAN_URL
     var lastChapterToDownload: Int? = null
-    var prefix: String = ""
-    var range: Range
+
+    var chaptersToDownload: List<String> = mutableListOf()
 
     var manga: String by Delegates.observable ("") {
         _, old, new ->
@@ -34,11 +33,10 @@ class MangaExtractorContext{
         MangaExtractorContext.scanDownloadProgressionListeners.forEach { it.scanDownloadProgressionChange(new) }
     }
 
-    constructor(prefix: String, range: Range, manga: String, currentChapter: String) {
-        this.prefix = prefix
-        this.range = range
+    constructor(manga: String, currentChapter: String = "", chaptersToDownload: List<String>) {
         this.manga = manga
         this.currentChapter = currentChapter
+        this.chaptersToDownload = chaptersToDownload
     }
 
     companion object {
@@ -58,6 +56,3 @@ class MangaExtractorContext{
     }
 
 }
-
-data class Range(val from: Int,
-                 val to: Int )

@@ -2,11 +2,9 @@
 
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXProgressBar?>
-<?import com.jfoenix.controls.JFXRadioButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -16,26 +14,9 @@
 <GridPane alignment="TOP_RIGHT" hgap="10.0" stylesheets="main.css" vgap="10.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.jordanmarques.japscandownloader.front.main.MainController">
    <children>
       <JFXTextField fx:id="nameInput" onKeyReleased="#onNameInputKeyPressed" promptText="Name" GridPane.columnIndex="1" />
-      <JFXTextField fx:id="prefixInput" promptText="Prefix(optional)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-      <JFXRadioButton fx:id="full" mnemonicParsing="false" onMouseClicked="#onModeRadioButtonClicked" selected="true" text="Full Manga" GridPane.rowIndex="2">
-         <toggleGroup>
-            <ToggleGroup fx:id="mode" />
-         </toggleGroup>
-      </JFXRadioButton>
-      <JFXRadioButton fx:id="range" mnemonicParsing="false" onMouseClicked="#onModeRadioButtonClicked" text="Range of chapters" toggleGroup="$mode" GridPane.rowIndex="3" />
-      <JFXRadioButton fx:id="chapter" mnemonicParsing="false" onMouseClicked="#onModeRadioButtonClicked" text="Specific Chapter" toggleGroup="$mode" GridPane.rowIndex="5" />
-      <JFXTextField fx:id="fromInput" prefHeight="27.0" prefWidth="158.0" promptText="From" visible="false" GridPane.rowIndex="4" />
-
-      <JFXTextField fx:id="toInput" promptText="To" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      <JFXTextField fx:id="chapterInput" promptText="Chapter" visible="false" GridPane.rowIndex="6" />
       <JFXButton fx:id="downloadButton" disable="true" mnemonicParsing="false" onMouseClicked="#download" prefHeight="27.0" prefWidth="236.0" text="Download" GridPane.rowIndex="7" />
       <JFXButton fx:id="stopButton" disable="true" mnemonicParsing="false" onMouseClicked="#stop" prefHeight="27.0" prefWidth="171.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="7" />
       <ImageView fx:id="infoNameImageView" fitHeight="18.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true" smooth="false" GridPane.halignment="RIGHT">
-         <image>
-            <Image url="@../../../../../images/info.png" />
-         </image>
-      </ImageView>
-      <ImageView fx:id="infoPrefixImageView" fitHeight="18.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true" smooth="false" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
          <image>
             <Image url="@../../../../../images/info.png" />
          </image>

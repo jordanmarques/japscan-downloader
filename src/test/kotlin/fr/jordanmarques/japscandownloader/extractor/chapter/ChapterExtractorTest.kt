@@ -34,4 +34,22 @@ class ChapterExtractorTest {
 
         Assertions.assertThat(numberOfScansInChapter).isEqualTo(expectedNumberOfScans)
     }
+
+    @Test
+    fun `should extract the name of chapter from his url, volume case`(){
+        val url = "/lecture-en-ligne/berserk/volume-35/"
+
+        val extractedName = url.extractChapterName()
+
+        Assertions.assertThat(extractedName).isEqualTo("volume-35")
+    }
+
+    @Test
+    fun `should extract the name of chapter from his url, simple case`(){
+        val url = "/lecture-en-ligne/berserk/325/"
+
+        val extractedName = url.extractChapterName()
+
+        Assertions.assertThat(extractedName).isEqualTo("325")
+    }
 }

@@ -1,9 +1,8 @@
 package fr.jordanmarques.japscandownloader.front.main
 
 import com.jfoenix.controls.JFXProgressBar
-import fr.jordanmarques.japscandownloader.extractor.Extractor
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
-import fr.jordanmarques.japscandownloader.extractor.Range
+import fr.jordanmarques.japscandownloader.extractor.chapter.ChapterExtractor
 import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
 import fr.jordanmarques.japscandownloader.listener.MangaNameListener
 import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
@@ -13,39 +12,22 @@ import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
-import org.omg.CORBA.portable.Delegate
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.io.IOException
-import java.io.OutputStream
-import java.io.PrintStream
-import kotlin.properties.Delegates
 
 
 @Component
-class MainController : ScanDownloadProgressionListener, MangaNameListener, CurrentChapterListener {
-
-    @Autowired
-    private lateinit var extractors: List<Extractor>
+class MainController(
+        private val chapterExtractor: ChapterExtractor
+): ScanDownloadProgressionListener, MangaNameListener, CurrentChapterListener {
 
     private lateinit var downloadThread: Thread
 
-    lateinit var mode: ToggleGroup
-
     lateinit var nameInput: TextField
-    lateinit var prefixInput: TextField
-    lateinit var fromInput: TextField
-    lateinit var toInput: TextField
-    lateinit var chapterInput: TextField
 
     lateinit var stopButton: Button
     lateinit var downloadButton: Button
 
-    lateinit var range: RadioButton
-    lateinit var chapter: RadioButton
-
     lateinit var infoNameImageView: ImageView
-    lateinit var infoPrefixImageView: ImageView
 
     lateinit var progressBar: JFXProgressBar
 
@@ -61,12 +43,11 @@ class MainController : ScanDownloadProgressionListener, MangaNameListener, Curre
 
     fun download(mouseEvent: MouseEvent) {
 
-        val mangaExtractorContext = buildMangaExtractorContext(nameInput, chapterInput, prefixInput, fromInput, toInput)
-        val extractor = extractors.first { it.mode().equals(mode.selectedMode(), ignoreCase = true) }
+        val list = mutableListOf<String>() //TODO Build Window Chapter Choice
 
         val downloadTask = object : Task<Void>() {
             public override fun call(): Void? {
-                extractor.extract(mangaExtractorContext)
+                chapterExtractor.extract(MangaExtractorContext(manga = nameInput.text, chaptersToDownload = list))
                 return null
             }
 
@@ -98,12 +79,6 @@ class MainController : ScanDownloadProgressionListener, MangaNameListener, Curre
         downloadButton.isDisable = nameInput.text.isEmpty()
     }
 
-    fun onModeRadioButtonClicked(){
-        fromInput.isVisible = range.isSelected
-        toInput.isVisible = range.isSelected
-        chapterInput.isVisible = chapter.isSelected
-    }
-
     fun ToggleGroup.selectedMode(): String {
         return (this.selectedToggle as RadioButton).id
     }
@@ -131,17 +106,6 @@ class MainController : ScanDownloadProgressionListener, MangaNameListener, Curre
         }
     }
 
-    private fun buildMangaExtractorContext(nameInput: TextField, chapterInput: TextField, prefixInput: TextField, fromInput: TextField, toInput: TextField): MangaExtractorContext {
-        val from = if (fromInput.text == "") 0 else fromInput.text.toInt()
-        val to = if (toInput.text == "") 0 else toInput.text.toInt()
-
-        return MangaExtractorContext(
-                manga = nameInput.text,
-                currentChapter = chapterInput.text,
-                prefix = prefixInput.text,
-                range = Range(from = from, to = to))
-    }
-
     private fun createTooltips() {
         val mangaNameImage = Image(MainController::class.java.getResourceAsStream("/images/manga-name-info.png"))
         val prefixImage = Image(MainController::class.java.getResourceAsStream("/images/prefix-info.png"))
@@ -153,7 +117,6 @@ class MainController : ScanDownloadProgressionListener, MangaNameListener, Curre
         addImageToTooltip(prefixTooltip, prefixImage)
 
         Tooltip.install(infoNameImageView, mangaNameTooltip)
-        Tooltip.install(infoPrefixImageView, prefixTooltip)
     }
 
     private fun addImageToTooltip(tooltip: Tooltip, image: Image) {
