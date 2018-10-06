@@ -93,7 +93,7 @@ class MainController(
     }
 
     fun selectChapters() {
-        availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text))
+        availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text.replace(" ","-")))
         buildAndDisplayCheckboxes(availableChapters)
     }
 
