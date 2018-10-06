@@ -40,3 +40,15 @@
     -fx-background-color: #737394;
     -fx-padding: 1.5;
 }
+
+.scroll-pane > .viewport {
+   -fx-background-color: transparent;
+}
+
+.scroll-pane {
+   -fx-background-color: transparent;
+}
+
+.check-box {
+   -fx-text-fill: white;
+}

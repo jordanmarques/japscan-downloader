@@ -8,29 +8,16 @@ import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
 import fr.jordanmarques.japscandownloader.listener.MangaNameListener
 import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
 import javafx.application.Platform
+import javafx.beans.value.ChangeListener
 import javafx.concurrent.Task
+import javafx.geometry.Insets
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.GridPane
-import org.springframework.stereotype.Component
-import com.sun.javafx.robot.impl.FXRobotHelper.getChildren
 import javafx.scene.layout.VBox
-import javafx.scene.control.cell.CheckBoxListCell
-import org.jboss.logging.MessageBundle
-import javafx.beans.value.ObservableValue
-import javafx.geometry.Insets
-import javafx.scene.control.CheckBox
-import javafx.scene.layout.Priority
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
-import javafx.collections.ListChangeListener
-import org.controlsfx.control.CheckListView
-
-
-
-
+import org.springframework.stereotype.Component
 
 
 @Component
@@ -38,10 +25,14 @@ class MainController(
         private val chapterExtractor: ChapterExtractor
 ): ScanDownloadProgressionListener, MangaNameListener, CurrentChapterListener {
 
+    private var DOWNLOAD_ALL_LABEL = "Download All"
+
     private lateinit var downloadThread: Thread
-    private lateinit var chaptersToDownload: List<Chapter>
+    private lateinit var availableChapters: List<Chapter>
+    private lateinit var checkboxes: List<CheckBox>
 
     lateinit var gridPane: GridPane
+    lateinit var scrollpane: ScrollPane
 
     lateinit var nameInput: TextField
 
@@ -56,8 +47,6 @@ class MainController(
     lateinit var mangaLabel: Label
     lateinit var chapterLabel: Label
 
-
-
     fun initialize() {
         createTooltips()
         MangaExtractorContext.listenForChapterChange(this)
@@ -68,7 +57,21 @@ class MainController(
     fun download(mouseEvent: MouseEvent) {
 
         val downloadTask = object : Task<Void>() {
+
             public override fun call(): Void? {
+
+                val checkedCheckBox = checkboxes.filter { it.isSelected }
+                val isDownladAllChecked = checkedCheckBox.find { it.text == DOWNLOAD_ALL_LABEL } != null
+
+                val chaptersToDownload = when (isDownladAllChecked) {
+                    true -> availableChapters
+                    false -> {
+                        checkedCheckBox
+                                .map { it.text }
+                                .map { title -> availableChapters.first { it.name == title } }
+                    }
+                }
+
                 chapterExtractor.extract(MangaExtractorContext(manga = nameInput.text, chaptersToDownload = chaptersToDownload))
                 return null
             }
@@ -90,16 +93,8 @@ class MainController(
     }
 
     fun selectChapters() {
-        var availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text))
-
-//        val strings = FXCollections.observableArrayList<String>()
-//        availableChapters.forEach { strings.add(it.name) }
-//
-//        val checkListView = CheckListView(strings)
-//
-//        checkListView.checkModel.checkedItems.addListener(ListChangeListener { println(checkListView.checkModel.checkedItems) })
-//
-//        gridPane.add(checkListView, 0,2)
+        availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text))
+        buildAndDisplayCheckboxes(availableChapters)
     }
 
     fun stop() {
@@ -139,6 +134,22 @@ class MainController(
         Platform.runLater {
             mangaLabel.text = cleanName
         }
+    }
+
+    private fun buildAndDisplayCheckboxes(availableChapters: List<Chapter>) {
+        val chaptersCheckboxes = availableChapters.map { CheckBox(it.name) }
+
+        val selectAllCheckbox = CheckBox(DOWNLOAD_ALL_LABEL)
+
+        checkboxes = mutableListOf<CheckBox>().plus(selectAllCheckbox).plus(chaptersCheckboxes)
+
+        val vbox = VBox()
+        vbox.children.addAll(checkboxes)
+        vbox.spacing = 10.0
+        vbox.padding = Insets(10.0)
+
+        scrollpane.content = vbox
+        scrollpane.isPannable = true
     }
 
     private fun createTooltips() {
