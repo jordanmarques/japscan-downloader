@@ -1,27 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXProgressBar?>
-<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
-
+<?import javafx.scene.layout.*?>
 <GridPane fx:id="gridPane" alignment="TOP_RIGHT" hgap="10.0" stylesheets="main.css" vgap="10.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.jordanmarques.japscandownloader.front.main.MainController">
    <children>
       <JFXTextField fx:id="nameInput" maxWidth="236.0" onKeyReleased="#onNameInputKeyPressed" prefWidth="236.0" promptText="Name" GridPane.columnIndex="1" />
       <JFXButton fx:id="downloadButton" disable="true" mnemonicParsing="false" onMouseClicked="#download" prefHeight="27.0" prefWidth="236.0" text="Download" GridPane.rowIndex="3" />
       <JFXButton fx:id="stopButton" disable="true" mnemonicParsing="false" onMouseClicked="#stop" prefHeight="27.0" prefWidth="236.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-      <ImageView fx:id="infoNameImageView" fitHeight="18.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true" smooth="false" GridPane.halignment="RIGHT">
-         <image>
-            <Image url="@../../../../../images/info.png" />
-         </image>
-      </ImageView>
       <JFXProgressBar fx:id="progressBar" prefHeight="21.0" prefWidth="484.0" progress="0.0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
       <Label fx:id="mangaLabel" alignment="CENTER" prefHeight="17.0" prefWidth="233.0" GridPane.rowIndex="4">
          <GridPane.margin>

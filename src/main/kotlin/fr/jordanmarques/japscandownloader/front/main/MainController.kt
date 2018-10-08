@@ -8,12 +8,9 @@ import fr.jordanmarques.japscandownloader.listener.CurrentChapterListener
 import fr.jordanmarques.japscandownloader.listener.MangaNameListener
 import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
 import javafx.application.Platform
-import javafx.beans.value.ChangeListener
 import javafx.concurrent.Task
 import javafx.geometry.Insets
 import javafx.scene.control.*
-import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
@@ -31,6 +28,8 @@ class MainController(
     private lateinit var availableChapters: List<Chapter>
     private lateinit var checkboxes: List<CheckBox>
 
+    private var mangaNameFormated: String = ""
+
     lateinit var gridPane: GridPane
     lateinit var scrollpane: ScrollPane
 
@@ -40,18 +39,17 @@ class MainController(
     lateinit var downloadButton: Button
     lateinit var selectChaptersButton: Button
 
-    lateinit var infoNameImageView: ImageView
-
     lateinit var progressBar: JFXProgressBar
 
     lateinit var mangaLabel: Label
     lateinit var chapterLabel: Label
 
     fun initialize() {
-        createTooltips()
         MangaExtractorContext.listenForChapterChange(this)
         MangaExtractorContext.listenForMangaName(this)
         MangaExtractorContext.listenForDownloadProgression(this)
+
+        nameInput.textProperty().addListener({ _, _, newValue -> mangaNameFormated = newValue.replace(" ", "-") })
     }
 
     fun download(mouseEvent: MouseEvent) {
@@ -60,19 +58,19 @@ class MainController(
 
             public override fun call(): Void? {
 
-                val checkedCheckBox = checkboxes.filter { it.isSelected }
-                val isDownladAllChecked = checkedCheckBox.find { it.text == DOWNLOAD_ALL_LABEL } != null
+                val selectedCheckBoxes = checkboxes.filter { it.isSelected }
+                val isDownladAllChecked = selectedCheckBoxes.find { it.text == DOWNLOAD_ALL_LABEL } != null
 
                 val chaptersToDownload = when (isDownladAllChecked) {
                     true -> availableChapters
                     false -> {
-                        checkedCheckBox
+                        selectedCheckBoxes
                                 .map { it.text }
                                 .map { title -> availableChapters.first { it.name == title } }
                     }
                 }
 
-                chapterExtractor.extract(MangaExtractorContext(manga = nameInput.text, chaptersToDownload = chaptersToDownload))
+                chapterExtractor.extract(MangaExtractorContext(manga = mangaNameFormated, chaptersToDownload = chaptersToDownload))
                 return null
             }
 
@@ -93,7 +91,7 @@ class MainController(
     }
 
     fun selectChapters() {
-        availableChapters = chapterExtractor.extractAvailableChapters(MangaExtractorContext(manga = nameInput.text))
+        availableChapters = chapterExtractor.extractAvailableChapters(mangaNameFormated)
         buildAndDisplayCheckboxes(availableChapters)
     }
 
@@ -151,23 +149,4 @@ class MainController(
         scrollpane.content = vbox
         scrollpane.isPannable = true
     }
-
-    private fun createTooltips() {
-        val mangaNameImage = Image(MainController::class.java.getResourceAsStream("/images/manga-name-info.png"))
-        val prefixImage = Image(MainController::class.java.getResourceAsStream("/images/prefix-info.png"))
-
-        val mangaNameTooltip = Tooltip()
-        addImageToTooltip(mangaNameTooltip, mangaNameImage)
-
-        val prefixTooltip = Tooltip()
-        addImageToTooltip(prefixTooltip, prefixImage)
-
-        Tooltip.install(infoNameImageView, mangaNameTooltip)
-    }
-
-    private fun addImageToTooltip(tooltip: Tooltip, image: Image) {
-        tooltip.graphic = ImageView(image)
-        infoNameImageView.isPickOnBounds = true
-    }
-
 }

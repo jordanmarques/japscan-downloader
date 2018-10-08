@@ -30,9 +30,9 @@ class ChapterExtractor(
 
     }
 
-    fun extractAvailableChapters(mangaExtractorContext: MangaExtractorContext): List<Chapter> {
+    fun extractAvailableChapters(mangaName: String): List<Chapter> {
         val availableChaptersUrl = "/mangas"
-        val availableChapters = Jsoup.connect("$JAPSCAN_URL$availableChaptersUrl/${mangaExtractorContext.manga}").get()
+        val availableChapters = Jsoup.connect("$JAPSCAN_URL$availableChaptersUrl/$mangaName").get()
                 ?: throw RuntimeException("")
 
         val htmlChapters = availableChapters.select("#liste_chapitres li")
