@@ -51,7 +51,7 @@ class MainController(
         MangaExtractorContext.listenForMangaName(this)
         MangaExtractorContext.listenForDownloadProgression(this)
 
-        nameInput.textProperty().addListener({ _, _, newValue -> mangaNameFormated = newValue.replace(" ", "-") })
+        nameInput.textProperty().addListener({ _, _, newValue -> mangaNameFormated = newValue.toLowerCase().replace(" ", "-") })
     }
 
     fun download(mouseEvent: MouseEvent) {

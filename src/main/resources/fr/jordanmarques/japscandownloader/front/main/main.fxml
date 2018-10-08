@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <GridPane fx:id="gridPane" alignment="TOP_RIGHT" hgap="10.0" stylesheets="main.css" vgap="10.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.jordanmarques.japscandownloader.front.main.MainController">
    <children>
-      <JFXTextField fx:id="nameInput" maxWidth="236.0" onKeyReleased="#onNameInputKeyPressed" prefWidth="236.0" promptText="Name" GridPane.columnIndex="1" />
+      <JFXTextField fx:id="nameInput" maxWidth="236.0" onKeyReleased="#onNameInputKeyPressed" prefWidth="236.0" promptText="Manga Name" GridPane.columnIndex="1" />
       <JFXButton fx:id="downloadButton" disable="true" mnemonicParsing="false" onMouseClicked="#download" prefHeight="27.0" prefWidth="236.0" text="Download" GridPane.rowIndex="3" />
       <JFXButton fx:id="stopButton" disable="true" mnemonicParsing="false" onMouseClicked="#stop" prefHeight="27.0" prefWidth="236.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="3" />
       <JFXProgressBar fx:id="progressBar" prefHeight="21.0" prefWidth="484.0" progress="0.0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
