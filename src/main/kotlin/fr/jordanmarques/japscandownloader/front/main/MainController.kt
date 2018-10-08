@@ -59,18 +59,13 @@ class MainController(
             public override fun call(): Void? {
 
                 val selectedCheckBoxes = checkboxes.filter { it.isSelected }
-                val isDownladAllChecked = selectedCheckBoxes.find { it.text == DOWNLOAD_ALL_LABEL } != null
 
-                val chaptersToDownload = when (isDownladAllChecked) {
-                    true -> availableChapters
-                    false -> {
-                        selectedCheckBoxes
-                                .map { it.text }
-                                .map { title -> availableChapters.first { it.name == title } }
-                    }
-                }
+                val chaptersToDownload = selectedCheckBoxes
+                        .map { it.text }
+                        .map { title -> availableChapters.firstOrNull { it.name == title } }
+                        .filter { it != null }
 
-                chapterExtractor.extract(MangaExtractorContext(manga = mangaNameFormated, chaptersToDownload = chaptersToDownload))
+                chapterExtractor.extract(MangaExtractorContext(manga = mangaNameFormated, chaptersToDownload = chaptersToDownload as List<Chapter>))
                 return null
             }
 
@@ -107,10 +102,6 @@ class MainController(
         downloadButton.isDisable = nameInput.text.isEmpty()
     }
 
-    fun ToggleGroup.selectedMode(): String {
-        return (this.selectedToggle as RadioButton).id
-    }
-
     override fun scanDownloadProgressionChange(progression: Int) {
         Platform.runLater {
             progressBar.progress = (progression.toDouble() / 100)
@@ -136,8 +127,11 @@ class MainController(
 
     private fun buildAndDisplayCheckboxes(availableChapters: List<Chapter>) {
         val chaptersCheckboxes = availableChapters.map { CheckBox(it.name) }
-
         val selectAllCheckbox = CheckBox(DOWNLOAD_ALL_LABEL)
+
+        selectAllCheckbox.selectedProperty().addListener { _, _, newValue ->
+            chaptersCheckboxes.forEach { it.isSelected = newValue }
+        }
 
         checkboxes = mutableListOf<CheckBox>().plus(selectAllCheckbox).plus(chaptersCheckboxes)
 
