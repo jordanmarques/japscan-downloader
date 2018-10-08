@@ -1,5 +1,6 @@
 package fr.jordanmarques.japscandownloader.front.main
 
+import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXProgressBar
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.Chapter
@@ -13,6 +14,7 @@ import javafx.geometry.Insets
 import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.springframework.stereotype.Component
 
@@ -62,10 +64,9 @@ class MainController(
 
                 val chaptersToDownload = selectedCheckBoxes
                         .map { it.text }
-                        .map { title -> availableChapters.firstOrNull { it.name == title } }
-                        .filter { it != null }
+                        .map { title -> availableChapters.first { it.name == title } }
 
-                chapterExtractor.extract(MangaExtractorContext(manga = mangaNameFormated, chaptersToDownload = chaptersToDownload as List<Chapter>))
+                chapterExtractor.extract(MangaExtractorContext(manga = mangaNameFormated, chaptersToDownload = chaptersToDownload))
                 return null
             }
 
@@ -126,16 +127,30 @@ class MainController(
     }
 
     private fun buildAndDisplayCheckboxes(availableChapters: List<Chapter>) {
-        val chaptersCheckboxes = availableChapters.map { CheckBox(it.name) }
-        val selectAllCheckbox = CheckBox(DOWNLOAD_ALL_LABEL)
 
-        selectAllCheckbox.selectedProperty().addListener { _, _, newValue ->
-            chaptersCheckboxes.forEach { it.isSelected = newValue }
+        if (availableChapters.isEmpty()){
+            var noChaptersFound = Label("No Chapters Found")
+            val vbox = VBox()
+            vbox.children.addAll(noChaptersFound)
+            scrollpane.content = vbox
+            return
         }
 
-        checkboxes = mutableListOf<CheckBox>().plus(selectAllCheckbox).plus(chaptersCheckboxes)
+        val chaptersCheckboxes = availableChapters.map { CheckBox(it.name) }
+
+        val selectAll = JFXButton("select all")
+        selectAll.setOnMouseClicked { chaptersCheckboxes.forEach { it.isSelected = true } }
+
+        val unselectAll = JFXButton("unselect all")
+        unselectAll.setOnMouseClicked { chaptersCheckboxes.forEach { it.isSelected = false } }
+
+        val buttons = HBox(selectAll, unselectAll)
+        buttons.spacing = 10.0
+
+        checkboxes = mutableListOf<CheckBox>().plus(chaptersCheckboxes)
 
         val vbox = VBox()
+        vbox.children.addAll(buttons)
         vbox.children.addAll(checkboxes)
         vbox.spacing = 10.0
         vbox.padding = Insets(10.0)
