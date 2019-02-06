@@ -11,7 +11,7 @@ import javax.imageio.ImageIO
 class CryptedImageExtractor {
 
     fun extract(chapter: String, scan: Int, manga: String): BufferedImage? {
-        return fetch("https://cdn.japscan.cc/cr_images/${manga.capitalizeEachWords()}/$chapter/${scan.format()}.jpg")
+        return fetch("https://c.japscan.to/clel/${manga.capitalizeEachWords()}/$chapter/${scan.format()}.jpg")
                 ?.let { decrypt(ImageIO.read(it)) }
     }
 
