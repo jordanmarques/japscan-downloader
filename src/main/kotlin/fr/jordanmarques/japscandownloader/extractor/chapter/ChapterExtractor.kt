@@ -1,5 +1,8 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter
 
+import com.gargoylesoftware.htmlunit.BrowserVersion
+import com.gargoylesoftware.htmlunit.WebClient
+import com.gargoylesoftware.htmlunit.html.HtmlPage
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
@@ -10,7 +13,11 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.springframework.stereotype.Component
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
+
+
+
 
 @Component
 class ChapterExtractor(
@@ -31,10 +38,31 @@ class ChapterExtractor(
     }
 
     fun extractAvailableChapters(mangaName: String): List<Chapter> {
-        val availableChapters = Jsoup.connect("$JAPSCAN_URL/manga/$mangaName/").get()
-                ?: throw RuntimeException("")
 
-        val htmlChapters = availableChapters.select("#liste_chapitres li")
+        val client = WebClient(BrowserVersion.CHROME)
+
+        with(client){
+            options.isCssEnabled = false
+            options.isJavaScriptEnabled = true
+            options.isThrowExceptionOnFailingStatusCode = false
+            options.isThrowExceptionOnScriptError = false
+            options.isRedirectEnabled = true
+            cache.maxSize = 0
+            javaScriptTimeout = 10000
+            waitForBackgroundJavaScript(10000)
+            waitForBackgroundJavaScriptStartingBefore(10000)
+        }
+
+        val url = "$JAPSCAN_URL/manga/$mangaName/"
+
+        client.getPage<HtmlPage>(url)
+        TimeUnit.SECONDS.sleep(5)
+
+        val streamedWebPage = client.getPage<HtmlPage>(url).webResponse.contentAsStream
+
+        val availableChapters = Jsoup.parse(streamedWebPage, Charsets.UTF_8.name(), url)
+
+        val htmlChapters = availableChapters.select(".chapters_list.text-truncate>a")
         return htmlChapters.map { Chapter(name = it.text(), url = it.select("a").attr("href")) }
     }
 
