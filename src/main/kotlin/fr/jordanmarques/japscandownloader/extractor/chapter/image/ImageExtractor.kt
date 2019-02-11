@@ -1,6 +1,6 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter.image
 
-import fr.jordanmarques.japscandownloader.util.fetch
+import fr.jordanmarques.japscandownloader.common.service.CloudflareService
 import org.jsoup.nodes.Document
 import org.springframework.stereotype.Component
 import java.awt.image.BufferedImage
@@ -8,12 +8,14 @@ import javax.imageio.ImageIO
 
 
 @Component
-class ImageExtractor {
+class ImageExtractor(
+        private val cloudflareService: CloudflareService
+) {
 
     fun extract(document: Document): BufferedImage? {
-        val imageUrl = document.select("#parImg").attr("src") or document.select("#image").attr("src")
+        val imageUrl = document.select("#parImg").attr("data-src") or document.select("#image").attr("data-src")
 
-        return imageUrl?.let { fetch(it)?.let { ImageIO.read(it) } }
+        return imageUrl?.let { cloudflareService.fetchImageAsInputStream(it)?.let { ImageIO.read(it) } }
     }
 
     infix fun String.or(src: String): String? {

@@ -1,28 +1,23 @@
 package fr.jordanmarques.japscandownloader.extractor.chapter
 
-import com.gargoylesoftware.htmlunit.BrowserVersion
-import com.gargoylesoftware.htmlunit.WebClient
-import com.gargoylesoftware.htmlunit.html.HtmlPage
+import fr.jordanmarques.japscandownloader.common.service.CloudflareService
+import fr.jordanmarques.japscandownloader.common.util.JAPSCAN_URL
+import fr.jordanmarques.japscandownloader.common.util.length
+import fr.jordanmarques.japscandownloader.common.util.toCbz
 import fr.jordanmarques.japscandownloader.extractor.MangaExtractorContext
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.ImageExtractor
 import fr.jordanmarques.japscandownloader.extractor.chapter.image.crypted.CryptedImageExtractor
-import fr.jordanmarques.japscandownloader.util.JAPSCAN_URL
-import fr.jordanmarques.japscandownloader.util.length
-import fr.jordanmarques.japscandownloader.util.toCbz
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.springframework.stereotype.Component
 import java.io.File
-import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
-
-
 
 
 @Component
 class ChapterExtractor(
         private val imageExtractor: ImageExtractor,
-        private val cryptedImageExtractor: CryptedImageExtractor
+        private val cryptedImageExtractor: CryptedImageExtractor,
+        private val clouflareService: CloudflareService
 ) {
     private val currentDirectory = System.getProperty("user.dir")
 
@@ -39,36 +34,16 @@ class ChapterExtractor(
 
     fun extractAvailableChapters(mangaName: String): List<Chapter> {
 
-        val client = WebClient(BrowserVersion.CHROME)
-
-        with(client){
-            options.isCssEnabled = false
-            options.isJavaScriptEnabled = true
-            options.isThrowExceptionOnFailingStatusCode = false
-            options.isThrowExceptionOnScriptError = false
-            options.isRedirectEnabled = true
-            cache.maxSize = 0
-            javaScriptTimeout = 10000
-            waitForBackgroundJavaScript(10000)
-            waitForBackgroundJavaScriptStartingBefore(10000)
-        }
-
-        val url = "$JAPSCAN_URL/manga/$mangaName/"
-
-        client.getPage<HtmlPage>(url)
-        TimeUnit.SECONDS.sleep(5)
-
-        val streamedWebPage = client.getPage<HtmlPage>(url).webResponse.contentAsStream
-
-        val availableChapters = Jsoup.parse(streamedWebPage, Charsets.UTF_8.name(), url)
+        val availableChapters = clouflareService.fetchAsDocument("$JAPSCAN_URL/manga/$mangaName/") ?:throw RuntimeException("No chapters found for this manga")
 
         val htmlChapters = availableChapters.select(".chapters_list.text-truncate>a")
         return htmlChapters.map { Chapter(name = it.text(), url = it.select("a").attr("href")) }
     }
 
+
+
     private fun extractScansAndCreateChapterCbz(chapterUrl: String, mangaExtractorContext: MangaExtractorContext) {
-        val chapter = Jsoup.connect(chapterUrl).get()
-                ?: throw RuntimeException("No Chapter found for url : $chapterUrl")
+        val chapter = clouflareService.fetchAsDocument(chapterUrl) ?:throw RuntimeException("Chapter not found")
 
         val chapterDirectoryPath = "$currentDirectory/${mangaExtractorContext.manga}/${mangaExtractorContext.manga}-${mangaExtractorContext.currentChapter}"
 
@@ -77,7 +52,7 @@ class ChapterExtractor(
         val numberOfScans = chapter.numberOfScans()
         for (i in 1..numberOfScans) {
             mangaExtractorContext.scanDownloadProgression = (i * 100) / numberOfScans
-            val scanDoc = Jsoup.connect("$chapterUrl/$i.html").get()
+            val scanDoc = clouflareService.fetchAsDocument("$chapterUrl$i.html")
                     ?: throw RuntimeException("No Scan found for url : $chapterUrl/$i.html")
 
             val scanPath = "$chapterDirectoryPath/${i.toCbzScanNumber()}.png"
@@ -113,4 +88,4 @@ fun String.extractChapterName(): String {
     return this.split("/").last { it.isNotEmpty() }
 }
 
-fun Document.numberOfScans(): Int = this.select("option").size
+fun Document.numberOfScans(): Int = this.select("#pages option").size

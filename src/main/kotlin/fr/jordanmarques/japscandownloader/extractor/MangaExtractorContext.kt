@@ -6,7 +6,7 @@ import fr.jordanmarques.japscandownloader.listener.MangaNameListener
 import fr.jordanmarques.japscandownloader.listener.ScanDownloadProgressionListener
 import kotlin.properties.Delegates
 
-import fr.jordanmarques.japscandownloader.util.JAPSCAN_URL
+import fr.jordanmarques.japscandownloader.common.util.JAPSCAN_URL
 
 class MangaExtractorContext{
 
