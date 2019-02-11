@@ -17,40 +17,25 @@ class CloudflareService {
 
     private var webClient: WebClient = initClient()
 
-    fun fetchAsInputStream(url: String): InputStream? = fetchPage(url).webResponse.contentAsStream
+    fun fetchAsInputStream(url: String): InputStream? = fetchPage<HtmlPage>(url).webResponse.contentAsStream
 
     fun fetchAsDocument(url: String): Document? = Jsoup.parse(fetchAsInputStream(url), Charsets.UTF_8.name(), url)
 
-    fun fetchImageAsInputStream(url: String): InputStream? = fetchImage(url)
+    fun fetchImageAsInputStream(url: String): InputStream? = fetchPage<Page>(url).webResponse.contentAsStream
 
-    private fun fetchPage(url: String): HtmlPage{
+    private fun <T> fetchPage(url: String): T where T: Page{
         val client = webClient
 
-        var page = client.getPage<HtmlPage>(url)
+        var page = client.getPage<T>(url)
 
         if (page.webResponse.contentAsString.contains("Checking your browser")) {
-            client.getPage<HtmlPage>(url)
+            client.getPage<T>(url)
             TimeUnit.SECONDS.sleep(6)
             page = client.getPage(url)
             updateWebClientCookies(page)
         }
 
         return page
-    }
-
-    private fun fetchImage(url: String): InputStream?{
-        val client = webClient
-
-        var page = client.getPage<Page>(url)
-
-        if (page.webResponse.contentAsString.contains("Checking your browser")) {
-            client.getPage<Page>(url)
-            TimeUnit.SECONDS.sleep(6)
-            page = client.getPage(url)
-            updateWebClientCookies(page)
-        }
-
-        return page.webResponse.contentAsStream
     }
 
     fun updateWebClientCookies(page: Page) {
